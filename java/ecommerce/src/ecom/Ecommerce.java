@@ -82,7 +82,6 @@ public class Ecommerce extends Application {
         // Read SQL script and create relations
         String parse = new String();
         String query = new String();
-
         sql.openConnection();
         File file = new File("src/SQLScript.sql");
         // parses queries and executes them in db (assumes script is written properly)

@@ -1,7 +1,7 @@
-CREATE DATABASE testing;
-USE testing;
+CREATE DATABASE IF NOT EXISTS ecommerce;
+USE ecommerce;
 
-CREATE TABLE BillingInfo (
+CREATE TABLE IF NOT EXISTS BillingInfo (
     Id INT                          NOT NULL AUTO_INCREMENT,
     CardNumber BIGINT                  NOT NULL,
     PhoneNumber BIGINT                 NOT NULL,
@@ -14,7 +14,7 @@ CREATE TABLE BillingInfo (
     CHECK (PhoneNumber > 1000000000 AND PhoneNumber < 10000000000)
 );
 
-CREATE TABLE Seller (
+CREATE TABLE IF NOT EXISTS Seller (
     Id INT                          NOT NULL AUTO_INCREMENT,
     BillingInfoId INT               NOT NULL,
     CompanyName CHAR(20)            NOT NULL,
@@ -25,7 +25,7 @@ CREATE TABLE Seller (
     CHECK (Id > 0)
 );
 
-CREATE TABLE Item (
+CREATE TABLE IF NOT EXISTS Item (
     Id INT				NOT NULL AUTO_INCREMENT,
     SellerId INT 			NOT NULL,
     Price DECIMAL			NOT NULL,
@@ -37,7 +37,7 @@ CREATE TABLE Item (
     CHECK (Id > 0 AND SellerId > 0 AND Price > 0)
 );
 
-CREATE TABLE Inventory (
+CREATE TABLE IF NOT EXISTS Inventory (
     ItemId INT  			NOT NULL, 
     SellerId INT 			NOT NULL,
     Quantity INT			DEFAULT 0,
@@ -50,7 +50,7 @@ CREATE TABLE Inventory (
         ON UPDATE CASCADE
 );
 
-CREATE TABLE Customers (
+CREATE TABLE IF NOT EXISTS Customers (
     Id INT			NOT NULL AUTO_INCREMENT,
     BillingInfoId INT		NOT NULL,
     LastName CHAR(20)		NOT NULL,
@@ -63,7 +63,7 @@ CREATE TABLE Customers (
     CHECK (Id > 0 AND BillingInfoId > 0)
 );
 
-CREATE TABLE ShoppingCart (
+CREATE TABLE IF NOT EXISTS ShoppingCart (
     CustomerId INT			NOT NULL,
     ItemId INT 				NOT NULL,
     SellerId INT                        NOT NULL,
@@ -82,7 +82,7 @@ CREATE TABLE ShoppingCart (
     CHECK ( (SELECT Quantity FROM Inventory WHERE ItemId = Inventory (ItemId) AND SellerId = Inventory (SellerId)) >= Quantity)
 );
 
-CREATE TABLE Orders (
+CREATE TABLE IF NOT EXISTS Orders (
     Id INT			NOT NULL AUTO_INCREMENT,
     CustomerId INT		NOT NULL,
     BillingInfoId INT		NOT NULL,
@@ -95,7 +95,7 @@ CREATE TABLE Orders (
     CHECK (Id > 0 AND CustomerId > 0 AND BillingInfoId > 0)
 );
 
-CREATE TABLE Ordered (
+CREATE TABLE IF NOT EXISTS Ordered (
     OrderId INT                 NOT NULL,
     ItemId INT                  NOT NULL,
     SellerId INT                NOT NULL,
@@ -107,7 +107,7 @@ CREATE TABLE Ordered (
     FOREIGN KEY (SellerId) REFERENCES Seller (Id)
 );
 
-CREATE TABLE User (
+CREATE TABLE IF NOT EXISTS User (
     SellerId INT,
     CustomerId INT,
     Username CHAR(20)		NOT NULL,

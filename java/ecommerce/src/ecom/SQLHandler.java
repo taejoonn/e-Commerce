@@ -23,7 +23,7 @@ public class SQLHandler {
 //            Class<?> forName = Class.forName("com.mysql.jdbc.Driver");
             DriverManager.registerDriver((Driver) Class.forName("com.mysql.jdbc.Driver").newInstance());
             // Connect to database
-            connect = DriverManager.getConnection("jdbc:mysql://localhost:8080/testing?autoReconnect=true&useSSL=false&zeroDateTimeBehavior=convertToNull", "username", "password");
+            connect = DriverManager.getConnection("jdbc:mysql://localhost:3306/ecommerce?autoReconnect=true&useSSL=false&zeroDateTimeBehavior=convertToNull", "root", "root");
             // create statment to execute
             statement = connect.createStatement();
         } catch (SQLException sqle) {
@@ -40,6 +40,7 @@ public class SQLHandler {
         try{
             statement.executeUpdate(query);
         } catch (SQLException ex){
+            System.out.println("Error modifying data");
         }
     }
     
