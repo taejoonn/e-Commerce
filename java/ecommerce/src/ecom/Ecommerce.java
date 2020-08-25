@@ -25,7 +25,6 @@ import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.ButtonType;
@@ -79,26 +78,27 @@ public class Ecommerce extends Application {
     public void start(Stage primaryStage) {
 
         SimpleDateFormat df = new SimpleDateFormat("yyyy/MM/dd");
-        // Read SQL script and create relations
-        String parse = new String();
-        String query = new String();
-        sql.openConnection();
-        File file = new File("src/SQLScript.sql");
-        // parses queries and executes them in db (assumes script is written properly)
-        try (Scanner scan = new Scanner(file)) {
-            while (scan.hasNextLine()) {
-                parse = scan.nextLine();
-                query += parse.replaceAll("\t+", " ");
-                if (parse.contains(";")) {
-                    query = query.replace(";", "");
-                    sql.modifyData(query);
-                    query = "";
-                }
-            }
-        } catch (FileNotFoundException ex) {
-            System.out.println("SQL Script file not found.");
-        }
-        sql.closeConnection();
+        // Not necessary as DB should be populated or initiated from DB
+        // // Read SQL script and create relations
+        // String parse = new String();
+        // String query = new String();
+        // sql.openConnection();
+        // File file = new File("src/SQLScript.sql");
+        // // parses queries and executes them in db (assumes script is written properly)
+        // try (Scanner scan = new Scanner(file)) {
+        //     while (scan.hasNextLine()) {
+        //         parse = scan.nextLine();
+        //         query += parse.replaceAll("\t+", " ");
+        //         if (parse.contains(";")) {
+        //             query = query.replace(";", "");
+        //             sql.modifyData(query);
+        //             query = "";
+        //         }
+        //     }
+        // } catch (FileNotFoundException ex) {
+        //     System.out.println("SQL Script file not found.");
+        // }
+        // sql.closeConnection();
         boolean looper = true;
         while (looper == true) {
             boolean existingAccount = false;
@@ -784,192 +784,9 @@ public class Ecommerce extends Application {
                 grid.setPadding(new Insets(20, 20, 20, 20));
 
                 if (isCustomer) {
-                    TextField firstNameTextField = new TextField();
-                    firstNameTextField.setPromptText("First Name");
-                    TextField lastNameTextField = new TextField();
-                    lastNameTextField.setPromptText("Last name");
-                    TextField emailTextField = new TextField();
-                    emailTextField.setPromptText("Email");
-                    TextField usernameTextField = new TextField();
-                    usernameTextField.setPromptText("Username");
-                    PasswordField passwordField = new PasswordField();
-                    passwordField.setPromptText("Password");
-                    TextField addressTextField = new TextField();
-                    addressTextField.setPromptText("Address");
-                    TextField cardTypeTextField = new TextField();
-                    cardTypeTextField.setPromptText("Card Type");
-                    TextField cardNumberTextField = new TextField();
-                    cardNumberTextField.setPromptText("Card Number");
-                    TextField cardExpiryDateTextField = new TextField();
-                    cardExpiryDateTextField.setPromptText("Card Expiry Date");
-                    TextField phoneNumberTextField = new TextField();
-                    phoneNumberTextField.setPromptText("Phone Number");
-
-                    grid.add(new Label("First Name"), 0, 0);
-                    grid.add(firstNameTextField, 1, 0);
-                    grid.add(new Label("Last Name"), 0, 1);
-                    grid.add(lastNameTextField, 1, 1);
-                    grid.add(new Label("Email"), 0, 2);
-                    grid.add(emailTextField, 1, 2);
-                    grid.add(new Label("User"), 0, 3);
-                    grid.add(usernameTextField, 1, 3);
-                    grid.add(new Label("Password"), 0, 4);
-                    grid.add(passwordField, 1, 4);
-                    grid.add(new Label("Address"), 0, 5);
-                    grid.add(addressTextField, 1, 5);
-                    grid.add(new Label("Cardtype"), 0, 6);
-                    grid.add(cardTypeTextField, 1, 6);
-                    grid.add(new Label("Card Number"), 0, 7);
-                    grid.add(cardNumberTextField, 1, 7);
-                    grid.add(new Label("Card Expiry Date"), 0, 8);
-                    grid.add(cardExpiryDateTextField, 1, 8);
-                    grid.add(new Label("Phone Number"), 0, 9);
-                    grid.add(phoneNumberTextField, 1, 9);
-
-                    newAccountDialog.getDialogPane().setContent(grid);
-
-                    Optional<ButtonType> newAccountResult = newAccountDialog.showAndWait();
-                    if (newAccountResult.get() == buttonTypeOK) {
-                        customer.setFirstName(firstNameTextField.getText());
-                        customer.setLastName(lastNameTextField.getText());
-                        customer.setEmail(emailTextField.getText());
-                        while (true) {
-                            user.setUsername(usernameTextField.getText());
-                            sql.closeConnection();
-                            sql.openConnection();
-                            sql.getTable("SELECT * FROM User WHERE Username = " + new String(user.getUsername()));
-                            if (sql.next()) {
-                                // alert on ui that username is taken
-                                continue;
-                            }
-                            break;
-                        }
-                        user.setPassword(passwordField.getText());
-                        billing.setAddress(addressTextField.getText());
-                        billing.setCardType(cardTypeTextField.getText());
-                        billing.setCardNumber(Long.parseLong(cardNumberTextField.getText()));
-                        billing.setCardExpiryDate(cardExpiryDateTextField.getText());
-                        billing.setPhoneNumber(Long.parseLong(phoneNumberTextField.getText()));
-
-                        sql.closeConnection();
-                        sql.openConnection();
-                        sql.insertData(billing);
-                        sql.closeConnection();
-                        sql.openConnection();
-                        sql.getTable("SELECT * FROM BillingInfo WHERE CardNumber = "
-                                + billing.getCardNumber() + " AND Address = '" + new String(billing.getAddress()) + "'");
-                        if (sql.next()) {
-                            billing = sql.getBillingInfo();
-                            customer.setBillingInfoID(billing.getID());
-                            sql.closeResultSet();
-                        }
-                        sql.closeConnection();
-                        sql.openConnection();
-                        sql.insertData(customer);
-                        sql.closeConnection();
-                        sql.openConnection();
-                        sql.getTable("SELECT * FROM Customers WHERE BillingInfoId = "
-                                + billing.getID());
-                        if (sql.next()) {
-                            customer = sql.getCustomer();
-                            user.setCustomerID(customer.getID());
-                            sql.closeResultSet();
-                        }
-                        sql.closeConnection();
-                        sql.openConnection();
-                        sql.insertData(user);
-                        sql.closeConnection();
-                        sql.openConnection();
-                    }
+                    
                 } else if (isSeller) {
-
-                    TextField companyNameTextField = new TextField();
-                    companyNameTextField.setPromptText("Company Name");
-                    TextField usernameTextField = new TextField();
-                    usernameTextField.setPromptText("Username");
-                    PasswordField passwordField = new PasswordField();
-                    passwordField.setPromptText("Password");
-                    TextField addressTextField = new TextField();
-                    addressTextField.setPromptText("Address");
-                    TextField cardTypeTextField = new TextField();
-                    cardTypeTextField.setPromptText("Cardtype");
-                    TextField cardNumberTextField = new TextField();
-                    cardNumberTextField.setPromptText("Card Number");
-                    TextField cardExpiryDateTextField = new TextField();
-                    cardExpiryDateTextField.setPromptText("Card Expiry Date");
-                    TextField phoneNumberTextField = new TextField();
-                    phoneNumberTextField.setPromptText("Phone Number");
-
-                    grid.add(new Label("Company Name"), 0, 0);
-                    grid.add(companyNameTextField, 1, 0);
-                    grid.add(new Label("Username"), 0, 1);
-                    grid.add(usernameTextField, 1, 1);
-                    grid.add(new Label("Password:"), 0, 2);
-                    grid.add(passwordField, 1, 2);
-                    grid.add(new Label("Address"), 0, 3);
-                    grid.add(addressTextField, 1, 3);
-                    grid.add(new Label("Cardtype"), 0, 4);
-                    grid.add(cardTypeTextField, 1, 4);
-                    grid.add(new Label("Card Number"), 0, 5);
-                    grid.add(cardNumberTextField, 1, 5);
-                    grid.add(new Label("Card Expiry Date"), 0, 6);
-                    grid.add(cardExpiryDateTextField, 1, 6);
-                    grid.add(new Label("Phone Number"), 0, 7);
-                    grid.add(phoneNumberTextField, 1, 7);
-
-                    newAccountDialog.getDialogPane().setContent(grid);
-
-                    Optional<ButtonType> newAccountResult = newAccountDialog.showAndWait();
-                    if (newAccountResult.get() == buttonTypeOK) {
-                        seller.setCompanyName(companyNameTextField.getText());
-                        while (true) {
-                            user.setUsername(usernameTextField.getText());
-                            sql.closeConnection();
-                            sql.openConnection();
-                            sql.getTable("SELECT * FROM User WHERE Username = " + new String(user.getUsername()));
-                            if (sql.next()) {
-                                // username already exists - alert on ui to try a different one
-                                continue;
-                            }
-                            sql.closeConnection();
-                            sql.openConnection();
-                            break;
-                        }
-                        user.setPassword(passwordField.getText());
-                        billing.setAddress(addressTextField.getText());
-                        billing.setCardType(cardTypeTextField.getText());
-                        billing.setCardNumber(Long.parseLong(cardNumberTextField.getText()));
-                        billing.setCardExpiryDate(cardExpiryDateTextField.getText());
-                        billing.setPhoneNumber(Long.parseLong(phoneNumberTextField.getText()));
-
-                        sql.insertData(billing);
-                        sql.closeConnection();
-                        sql.openConnection();
-                        sql.getTable("SELECT * FROM BillingInfo WHERE CardNumber = "
-                                + billing.getCardNumber() + " AND Address = '" + new String(billing.getAddress()) + "'");
-                        if (sql.next()) {
-                            billing = sql.getBillingInfo();
-                            seller.setBillingInfoID(billing.getID());
-                            sql.closeResultSet();
-                        }
-                        sql.closeConnection();
-                        sql.openConnection();
-                        sql.insertData(seller);
-                        sql.closeConnection();
-                        sql.openConnection();
-                        sql.getTable("SELECT * FROM Seller WHERE BillingInfoId = "
-                                + seller.getBillingInfoID());
-                        if (sql.next()) {
-                            seller = sql.getSeller();
-                            user.setSellerID(seller.getID());
-                            sql.closeResultSet();
-                        }
-                        sql.closeConnection();
-                        sql.openConnection();
-                        sql.insertData(user);
-                        sql.closeConnection();
-                        sql.openConnection();
-                    }
+                    seller(grid, newAccountDialog, buttonTypeOK, seller, user, billing);
                 }
             }
         }
@@ -980,5 +797,199 @@ public class Ecommerce extends Application {
      */
     public static void main(String[] args) {
         launch(args);
+    }
+
+    public void buyer(GridPane grid, Alert newAccountDialog, Customers customer, 
+        User user, BillingInfo billing, ButtonType buttonTypeOK, SQLHandler sql){
+
+        TextField firstNameTextField = new TextField();
+        firstNameTextField.setPromptText("First Name");
+        TextField lastNameTextField = new TextField();
+        lastNameTextField.setPromptText("Last name");
+        TextField emailTextField = new TextField();
+        emailTextField.setPromptText("Email");
+        TextField usernameTextField = new TextField();
+        usernameTextField.setPromptText("Username");
+        PasswordField passwordField = new PasswordField();
+        passwordField.setPromptText("Password");
+        TextField addressTextField = new TextField();
+        addressTextField.setPromptText("Address");
+        TextField cardTypeTextField = new TextField();
+        cardTypeTextField.setPromptText("Card Type");
+        TextField cardNumberTextField = new TextField();
+        cardNumberTextField.setPromptText("Card Number");
+        TextField cardExpiryDateTextField = new TextField();
+        cardExpiryDateTextField.setPromptText("Card Expiry Date");
+        TextField phoneNumberTextField = new TextField();
+        phoneNumberTextField.setPromptText("Phone Number");
+
+        grid.add(new Label("First Name"), 0, 0);
+        grid.add(firstNameTextField, 1, 0);
+        grid.add(new Label("Last Name"), 0, 1);
+        grid.add(lastNameTextField, 1, 1);
+        grid.add(new Label("Email"), 0, 2);
+        grid.add(emailTextField, 1, 2);
+        grid.add(new Label("User"), 0, 3);
+        grid.add(usernameTextField, 1, 3);
+        grid.add(new Label("Password"), 0, 4);
+        grid.add(passwordField, 1, 4);
+        grid.add(new Label("Address"), 0, 5);
+        grid.add(addressTextField, 1, 5);
+        grid.add(new Label("Cardtype"), 0, 6);
+        grid.add(cardTypeTextField, 1, 6);
+        grid.add(new Label("Card Number"), 0, 7);
+        grid.add(cardNumberTextField, 1, 7);
+        grid.add(new Label("Card Expiry Date"), 0, 8);
+        grid.add(cardExpiryDateTextField, 1, 8);
+        grid.add(new Label("Phone Number"), 0, 9);
+        grid.add(phoneNumberTextField, 1, 9);
+
+        newAccountDialog.getDialogPane().setContent(grid);
+
+        Optional<ButtonType> newAccountResult = newAccountDialog.showAndWait();
+        if (newAccountResult.get() == buttonTypeOK) {
+            customer.setFirstName(firstNameTextField.getText());
+            customer.setLastName(lastNameTextField.getText());
+            customer.setEmail(emailTextField.getText());
+            while (true) {
+                user.setUsername(usernameTextField.getText());
+                sql.closeConnection();
+                sql.openConnection();
+                sql.getTable("SELECT * FROM User WHERE Username = " + new String(user.getUsername()));
+                if (sql.next()) {
+                    // alert on ui that username is taken
+                    continue;
+                }
+                break;
+            }
+            user.setPassword(passwordField.getText());
+            billing.setAddress(addressTextField.getText());
+            billing.setCardType(cardTypeTextField.getText());
+            billing.setCardNumber(Long.parseLong(cardNumberTextField.getText()));
+            billing.setCardExpiryDate(cardExpiryDateTextField.getText());
+            billing.setPhoneNumber(Long.parseLong(phoneNumberTextField.getText()));
+
+            sql.closeConnection();
+            sql.openConnection();
+            sql.insertData(billing);
+            sql.closeConnection();
+            sql.openConnection();
+            sql.getTable("SELECT * FROM BillingInfo WHERE CardNumber = "
+                    + billing.getCardNumber() + " AND Address = '" + new String(billing.getAddress()) + "'");
+            if (sql.next()) {
+                billing = sql.getBillingInfo();
+                customer.setBillingInfoID(billing.getID());
+                sql.closeResultSet();
+            }
+            sql.closeConnection();
+            sql.openConnection();
+            sql.insertData(customer);
+            sql.closeConnection();
+            sql.openConnection();
+            sql.getTable("SELECT * FROM Customers WHERE BillingInfoId = "
+                    + billing.getID());
+            if (sql.next()) {
+                customer = sql.getCustomer();
+                user.setCustomerID(customer.getID());
+                sql.closeResultSet();
+            }
+            sql.closeConnection();
+            sql.openConnection();
+            sql.insertData(user);
+            sql.closeConnection();
+            sql.openConnection();
+        }
+    }
+
+    public void seller(GridPane grid, Alert newAccountDialog, ButtonType buttonTypeOK, Seller seller,
+        User user, BillingInfo billing, SQLHandler sql){
+        
+        TextField companyNameTextField = new TextField();
+        companyNameTextField.setPromptText("Company Name");
+        TextField usernameTextField = new TextField();
+        usernameTextField.setPromptText("Username");
+        PasswordField passwordField = new PasswordField();
+        passwordField.setPromptText("Password");
+        TextField addressTextField = new TextField();
+        addressTextField.setPromptText("Address");
+        TextField cardTypeTextField = new TextField();
+        cardTypeTextField.setPromptText("Cardtype");
+        TextField cardNumberTextField = new TextField();
+        cardNumberTextField.setPromptText("Card Number");
+        TextField cardExpiryDateTextField = new TextField();
+        cardExpiryDateTextField.setPromptText("Card Expiry Date");
+        TextField phoneNumberTextField = new TextField();
+        phoneNumberTextField.setPromptText("Phone Number");
+
+        grid.add(new Label("Company Name"), 0, 0);
+        grid.add(companyNameTextField, 1, 0);
+        grid.add(new Label("Username"), 0, 1);
+        grid.add(usernameTextField, 1, 1);
+        grid.add(new Label("Password:"), 0, 2);
+        grid.add(passwordField, 1, 2);
+        grid.add(new Label("Address"), 0, 3);
+        grid.add(addressTextField, 1, 3);
+        grid.add(new Label("Cardtype"), 0, 4);
+        grid.add(cardTypeTextField, 1, 4);
+        grid.add(new Label("Card Number"), 0, 5);
+        grid.add(cardNumberTextField, 1, 5);
+        grid.add(new Label("Card Expiry Date"), 0, 6);
+        grid.add(cardExpiryDateTextField, 1, 6);
+        grid.add(new Label("Phone Number"), 0, 7);
+        grid.add(phoneNumberTextField, 1, 7);
+
+        newAccountDialog.getDialogPane().setContent(grid);
+
+        Optional<ButtonType> newAccountResult = newAccountDialog.showAndWait();
+        if (newAccountResult.get() == buttonTypeOK) {
+            seller.setCompanyName(companyNameTextField.getText());
+            while (true) {
+                user.setUsername(usernameTextField.getText());
+                sql.closeConnection();
+                sql.openConnection();
+                sql.getTable("SELECT * FROM User WHERE Username = " + new String(user.getUsername()));
+                if (sql.next()) {
+                    // username already exists - alert on ui to try a different one
+                    continue;
+                }
+                sql.closeConnection();
+                sql.openConnection();
+                break;
+            }
+            user.setPassword(passwordField.getText());
+            billing.setAddress(addressTextField.getText());
+            billing.setCardType(cardTypeTextField.getText());
+            billing.setCardNumber(Long.parseLong(cardNumberTextField.getText()));
+            billing.setCardExpiryDate(cardExpiryDateTextField.getText());
+            billing.setPhoneNumber(Long.parseLong(phoneNumberTextField.getText()));
+
+            sql.insertData(billing);
+            sql.closeConnection();
+            sql.openConnection();
+            sql.getTable("SELECT * FROM BillingInfo WHERE CardNumber = "
+                    + billing.getCardNumber() + " AND Address = '" + new String(billing.getAddress()) + "'");
+            if (sql.next()) {
+                billing = sql.getBillingInfo();
+                seller.setBillingInfoID(billing.getID());
+                sql.closeResultSet();
+            }
+            sql.closeConnection();
+            sql.openConnection();
+            sql.insertData(seller);
+            sql.closeConnection();
+            sql.openConnection();
+            sql.getTable("SELECT * FROM Seller WHERE BillingInfoId = "
+                    + seller.getBillingInfoID());
+            if (sql.next()) {
+                seller = sql.getSeller();
+                user.setSellerID(seller.getID());
+                sql.closeResultSet();
+            }
+            sql.closeConnection();
+            sql.openConnection();
+            sql.insertData(user);
+            sql.closeConnection();
+            sql.openConnection();
+        }
     }
 }

@@ -9,10 +9,6 @@ import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 
-/**
- *
- * @author sb
- */
 public class SellerTable {
     private final SimpleStringProperty productName;
     private final SimpleStringProperty productDescription;
